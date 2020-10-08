@@ -9,6 +9,7 @@ import (
 	"time"
 	goerrors "errors"
 
+	errors2 "github.com/pkg/errors"
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/errors"
 	"golang.org/x/crypto/openpgp/packet"
@@ -447,7 +448,7 @@ func addSubkey(e *Entity, packets *packet.Reader, pub *packet.PublicKey, priv *p
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return errors.StructuralError("subkey signature invalid: " + err.Error())
+			return errors2.Wrap(err, errors.StructuralError("subkey signature invalid").Error())
 		}
 
 		sig, ok := p.(*packet.Signature)
@@ -461,7 +462,7 @@ func addSubkey(e *Entity, packets *packet.Reader, pub *packet.PublicKey, priv *p
 		}
 
 		if err := e.PrimaryKey.VerifyKeySignature(subKey.PublicKey, sig); err != nil {
-			return errors.StructuralError("subkey signature invalid: " + err.Error())
+			return errors2.Wrap(err, errors.StructuralError("subkey signature invalid").Error())
 		}
 
 		switch sig.SigType {
